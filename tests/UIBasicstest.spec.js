@@ -1,87 +1,114 @@
 const {test, expect} = require('@playwright/test');
+const { login } = require('../utils/login');
 
 
-test ('Browser Context First Playwrigth test', async ({browser}) =>
+test.describe('Validate Hamburger Menu Options', () => {
+    
+test('Login & First MenuOption', async ({page}) =>
 {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-    const userName = page.locator('#username');
-    const signIn = page.locator("#signInBtn")
-    const cardTitles = page.locator(".card-body a");
-    await page.goto("https://rahulshettyacademy.com/loginpagePractise/");
-    console.log(await page.title());
-    //css , xpath
-    await userName.fill('rahulshetty');
-    await page.locator("[type='password']").fill('learning');
-    await signIn.click();
-    console.log (await page.locator("[style*='block']").textContent());
-    await expect(page.locator("[style*='block']")).toContainText('Incorrect');
-    await userName.fill("");
-    await userName.fill("rahulshettyacademy");
-    await signIn.click();
-    console.log (await cardTitles.first().textContent());
-    console.log (await cardTitles.nth(1).textContent());
-    const allTitles = await cardTitles.allTextContents();
-    console.log(allTitles);
+
+    const menuContainer = page.locator('#menu_button_container')
+    const menuOption1 = await page.getByRole('link', { name: 'All Items' });
+    
+    await login (page, 'standard_user','secret_sauce');
+    await page.locator('dic. login_logo');
+    console.log(await page.getByText('Swag Labs'));
+    await menuContainer.isVisible(); 
+    await page.getByRole('button', { name: 'Open Menu' }).click();
+    await page.locator('div.bm-menu').isVisible();
+    await expect (menuOption1).toHaveText('All Items');
 
 });
 
-test ('UI Controls', async ({page}) => {
-    await page.goto('https://rahulshettyacademy.com/loginpagePractise');
-    const username = page.locator('#username');
-    const signIn = page.locator("signInBtn");
-    const dropdown = page.locator("select.form-control");
-    const documentLink = page.locator("[href*='documents-request']");
-    await dropdown.selectOption("consult");
-    await page.locator(".radiotextsty").last().click();
-    await page.locator("#okayBtn").click();
-    console.log(await page.locator(".radiotextsty").last().isChecked());
-    await expect(page.locator(".radiotextsty").last()).toBeChecked();
-    await page.locator("#terms").click();
-    await expect (page.locator("#terms")).toBeChecked();
-    await page.locator("#terms").uncheck();
-    expect(await page.locator("#terms").isChecked()).toBeFalsy();
-    await expect(documentLink).toHaveAttribute("class", "blinkingText");
+test('2nd Menu Option', async ({page}) => {
 
-    //assertion
+    const menuContainer = page.locator('#menu_button_container')
+    const menuOption2 = await page.getByRole('link', { name: 'About' })
 
-    //await page.pause();
-})
+    await login (page, 'standard_user','secret_sauce');
+    await page.getByRole('button', { name: 'Open Menu' }).click();
+    await expect (menuOption2).toHaveText('About');
+    await menuOption2.click();
+    await expect(page).toHaveURL('https://saucelabs.com/');  
+});
+
+test ('3rd Menu Option', async ({page}) => {
+
+    const menuContainer = page.locator('#menu_button_container')
+    const menuOption3 = await page.getByRole('link', { name: 'Logout' })
+
+    await login (page, 'standar_user', 'secret_sauce');
+    await page.getByRole('button', { name: 'Open Menu' }).click();
+    await expect (menuOption3).toHaveText('Logout');
+    await menuOption3.click();
+    await page.locator('dic. login_logo');
+    console.log(await page.getByText('Swag Labs'));
+
+});
+
+test ('Add & Remove an Item to Cart', async ({page}) => {
+
+    const addCartButtn = await page.locator('#add-to-cart-sauce-labs-backpack');
+    const cartBttn = await page.locator('#shopping_cart_container');
+    const product = await page.locator('[data-test="cart-list"]');
+    const removeBtnn = await page.getByRole('button', { name: 'Remove' });
+    const backShopButnn = await page.getByRole('button', { name: 'Continue Shopping' });
 
 
-test ('ChildWindows handl', async({browser}) =>
-{ 
-    const context = await browser.newContext();
-    const page = await context.newPage();
-    const userName = page.locator('#username');
-    await page.goto('https://rahulshettyacademy.com/loginpagePractise');
-    const documentLink = page.locator("[href*='documents-request']");
+     await login (page, 'standar_user', 'secret_sauce');
+     await page.locator('dic. login_logo');
+     await expect (addCartButtn).toBeVisible();
+     await addCartButtn.click();
+     await expect(cartBttn).toBeVisible();
+     await cartBttn.click();
+     await expect(product).toBeVisible();
 
-    const [newPage] = await Promise.all([
+     /*Remove Product*/
+     await expect(removeBtnn).toBeVisible();
+     await removeBtnn.click();
+     /*Back Shopping*/
+     await expect(backShopButnn).toBeVisible();
+     await backShopButnn.click();
 
-    context.waitForEvent('page'), //listen for new pages-tab
-    documentLink.click(),
-    ])
+});
+
+test ('Use of Filters', async ({page}) => {
+
+    const filterButtn = await page.getByRole('combobox');
    
-    const text =  await newPage.locator(".red").textContent();
-    const arrayText = text.split("@")
-    const domain = arrayText[1].split(" ")[0]
-    //console.log(domain);
-    await page.locator("#username").fill(domain);
-    console.log(await page.locator("#username").inputValue());
-
-})
 
 
-test('Page Playwrigth test', async ({page}) =>
-{
-    await page.goto("https://google.com");
-    //get title - assertion
-    console.log(await page.title());
-    await expect(page).toHaveTitle("Google");
+    await login (page, 'standar_user', 'secret_sauce');
+    await page.locator('dic. login_logo');
+    await expect(filterButtn).toBeVisible();
+    await filterButtn.click();
+    await expect (page.locator('.product_sort_container option')).toHaveText(['Name (A to Z)', 'Name (Z to A)', 'Price (low to high)', 'Price (high to low)']);
+
+    const options = [
+    { value: 'az', text: 'Name (A to Z)' },
+    { value: 'za', text: 'Name (Z to A)' },
+    { value: 'lohi', text: 'Price (low to high)' },
+    { value: 'hilo', text: 'Price (high to low)' }
+];
+
+    for (const option of options) {
+
+    await page.selectOption(
+    '.product_sort_container',
+    option.value
+  );
+
+    await expect(
+    page.locator('.product_sort_container')
+    ).toHaveValue(option.value);
+
+}
+    
+
 
 
 });
 
 
 
+});
