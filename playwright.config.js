@@ -1,6 +1,12 @@
 // @ts-check
 import { defineConfig, devices } from '@playwright/test';
 
+export default defineConfig({
+  use: {
+    screenshot: 'only-on-failure',
+    trace: 'retain-on-failure',
+  },
+});
 
 /**
  * @see https://playwright.dev/docs/test-configuration
@@ -20,9 +26,9 @@ const config = ({
       headless : false,
       screenshot: 'on',
       trace: 'on'
-
       
   },
+
 });
 
 module.exports = config
