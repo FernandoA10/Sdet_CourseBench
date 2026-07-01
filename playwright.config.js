@@ -1,29 +1,28 @@
 // @ts-check
-import { defineConfig, devices } from '@playwright/test';
+const { defineConfig } = require('@playwright/test');
 
+module.exports = defineConfig({
 
-/**
- * @see https://playwright.dev/docs/test-configuration
-
- */
-const config = ({
   testDir: './tests',
-  timeout: 30 *1000,
-  expect:{
-      timeout: 5000,
+
+  timeout: 30 * 1000,
+
+  expect: {
+    timeout: 5000,
   },
 
-  reporter : 'html',
+  reporter: [
+    ['html']
+  ],
 
   use: {
-      browserName: 'chromium',
-      headless : false,
-      screenshot: 'on',
-      trace: 'on'
+    baseURL: 'https://restful-booker.herokuapp.com',
 
-      
-  },
+    browserName: 'chromium',
+    headless: false,
+
+    screenshot: 'on',
+    trace: 'on'
+  }
+
 });
-
-module.exports = config
-  
